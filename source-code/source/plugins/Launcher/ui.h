@@ -198,8 +198,12 @@ namespace Launcher {
 			String^ vendor = gcnew String((char*)glGetString(GL_VENDOR));
 			vendor = vendor->Replace(" Corporation", ""); // this is useless..  remove it to help ensure the GPU type line fits
 			String^ renderer = gcnew String((char*)glGetString(GL_RENDERER));
+			renderer = renderer->Replace("Apple ", ""); // "Apple Apple M1" -> "Apple M1"
 			String^ version = gcnew String((char*)glGetString(GL_VERSION));
-			version = version->Replace(" Profile Context", ""); // we don't need this, either
+			version = version->Replace(" Profile Context", "") // we don't need this, either
+				// misleading - the Metal layer always provides 2.1 as well as 4.1 Core (with the forwards compatiblity bit)
+				// even though the GLUT context is technically 2.1, inform the user that 4.1 fwcompat is supported (in case they want to use mods)
+				->Replace("2.1 Metal", "2.1/4.1 (forward-compatible) Metal");
 
 			String^ gpuModel = gcnew String(GPUModel::getGpuName().c_str());
 
@@ -237,7 +241,7 @@ namespace Launcher {
 			bool novidiaEnabled = false;
 
 			bool hasDivaGL = false;
-			bool divaGLEnabled = true;
+			bool divaGLEnabled = false;
 
 			for (PluginInfo i : AllPlugins)
 			{
@@ -288,7 +292,7 @@ namespace Launcher {
 							else if (wineVersion == "" && (driver_version_major > 22 || (driver_version_major == 22 && driver_version_minor > 6)))
 							{
 								this->labelGPU->Text += "Issues: Unsupported GPU driver.";
-								GPUIssueText = "The graphics driver you're using is too new for Novidia.\nThe game will not run unless you install driver version 22.6.1 or earlier from AMD's website.";
+								GPUIssueText = "The graphics driver you're using is too new for Novidia.\nThe game will not run unless you install driver version 22.6.1 or earlier from AMD's website.\n\nAlternatively, you can try mods such as DivaGL.";
 								this->labelGPU->LinkColor = System::Drawing::Color::Red;
 								showGpuDialog = true;
 							}
@@ -302,10 +306,18 @@ namespace Launcher {
 						else
 						{
 							this->labelGPU->Text += "Issues: Mods needed for AMD compatibility!";
-							GPUIssueText = "AMD GPUs are not supported without mods.\nNovidia is installed, but disabled; please enable it to use your AMD GPU.\n\nIf you have a laptop with an NVIDIA GPU and wish to use it instead of the detected GPU, you may need to set diva.exe to use it in Windows settings or NVIDIA Control Panel.";
+							GPUIssueText = "AMD GPUs are not supported without mods.\n" +
+								(hasDivaGL ? "DivaGL/" : "") + "Novidia is installed, but disabled; please enable it to use your AMD GPU.\n\nIf you have a laptop with an NVIDIA GPU and wish to use it instead of the detected GPU, you may need to set diva.exe to use it in Windows settings or NVIDIA Control Panel.";
 							this->labelGPU->LinkColor = System::Drawing::Color::Red;
 							showGpuDialog = true;
 						}
+					}
+					else if (hasDivaGL)
+					{
+						this->labelGPU->Text += "Issues: Mods needed for AMD compatibility!";
+						GPUIssueText = "AMD GPUs are not supported without mods.\nDivaGL is installed, but disabled; please enable it to use your AMD GPU.\n\nIf you have a laptop with an NVIDIA GPU and wish to use it instead of the detected GPU, you may need to set diva.exe to use it in Windows settings or NVIDIA Control Panel.";
+						this->labelGPU->LinkColor = System::Drawing::Color::Red;
+						showGpuDialog = true;
 					}
 					else
 					{
