@@ -155,18 +155,18 @@ void InjectCode(void* address, const std::vector<uint8_t> data)
 
 bool hasConflicts()
 {
-	printf("[Novidia] Checking for conflicts...\n");
+	puts("[Novidia] Checking for conflicts...");
 
 	if(GetModuleHandleW(L"DivaGL.dva") != NULL)
 	{
 		// detected DivaGL
-		printf("[Novidia] Detected DivaGL! Quitting!\n");
+		puts("[Novidia] Detected DivaGL! Quitting!");
 #ifdef _DEBUG
 		MessageBoxExW(NULL, L"Detected DivaGL! Quitting!\n", L"Novidia", MB_OK, 0);
 #endif
 		return true;
 	}
 
-	printf("[Novidia] No conflicts found.\n");
+	puts("[Novidia] No conflicts found.");
 	return false;
 }

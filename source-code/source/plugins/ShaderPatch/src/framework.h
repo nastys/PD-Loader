@@ -165,18 +165,18 @@ LPCWSTR CONFIG_FILE = CONFIG_FILE_STRING.c_str();
 
 bool hasConflicts()
 {
-	printf("[ShaderPatch] Checking for conflicts...\n");
+	puts("[ShaderPatch] Checking for conflicts...");
 
 	if (GetModuleHandleW(L"DivaGL.dva") != NULL)
 	{
 		// detected DivaGL
-		printf("[ShaderPatch] Detected DivaGL! Quitting!\n");
+		puts("[ShaderPatch] Detected DivaGL! Quitting!");
 #ifdef _DEBUG
 		MessageBoxExW(NULL, L"Detected DivaGL! Quitting!\n", L"ShaderPatch", MB_OK, 0);
 #endif
 		return true;
 	}
 
-	printf("[ShaderPatch] No conflicts found.\n");
+	puts("[ShaderPatch] No conflicts found.");
 	return false;
 }
