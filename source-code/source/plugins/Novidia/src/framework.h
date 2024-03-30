@@ -1,8 +1,8 @@
 #pragma once
 
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#include <psapi.h>
+//#define WIN32_LEAN_AND_MEAN
+//#include <windows.h>
+//#include <psapi.h>
 
 #include <vector>
 
@@ -119,36 +119,54 @@ void InjectCode(void* address, const std::vector<uint8_t> data)
 	VirtualProtect(address, byteCount, oldProtect, nullptr);
 }
 
+//bool hasConflicts()
+//{
+//	printf("[Novidia] Checking for conflicts...\n");
+//
+//	HMODULE* hModules = new HMODULE[USHRT_MAX];
+//	HANDLE hProcess;
+//	DWORD cbNeeded;
+//
+//	hProcess = GetCurrentProcess();
+//
+//	if (EnumProcessModules(hProcess, hModules, sizeof(hModules), &cbNeeded)) {
+//		for (unsigned long long i = 0; i < (cbNeeded / sizeof(HMODULE)); i++) {
+//			auto pNameFunc = (LPCWSTR(*)())GetProcAddress(hModules[i], "GetPluginName");
+//			if (pNameFunc) {
+//				LPCWSTR name = pNameFunc();
+//				if (name && lstrcmpW(name, L"DivaGL") == 0)
+//				{
+//					// detected DivaGL
+//					printf("[Novidia] Detected DivaGL! Quitting!\n");
+//#ifdef _DEBUG
+//					MessageBoxExW(NULL, L"Detected DivaGL! Quitting!\n", L"Novidia", MB_OK, 0);
+//#endif
+//					delete[] hModules;
+//					return true;
+//				}
+//			}
+//		}
+//	}
+//
+//	printf("[Novidia] No conflicts found.\n");
+//	delete[] hModules;
+//	return false;
+//}
 
 bool hasConflicts()
 {
-	HMODULE hModules[1024];
-	HANDLE hProcess;
-	DWORD cbNeeded;
+	printf("[Novidia] Checking for conflicts...\n");
 
-	hProcess = GetCurrentProcess();
-
-	if (EnumProcessModules(hProcess, hModules, sizeof(hModules), &cbNeeded)) {
-		for (unsigned int i = 0; i < (cbNeeded / sizeof(HMODULE)); i++) {
-			TCHAR szModName[MAX_PATH];
-
-			if (GetModuleFileNameEx(hProcess, hModules[i], szModName, sizeof(szModName) / sizeof(TCHAR))) {
-				auto pNameFunc = (LPCWSTR(*)())GetProcAddress(hModules[i], "GetPluginName");
-				if (pNameFunc) {
-					LPCWSTR name = pNameFunc();
-					if (lstrcmpW(name, L"DivaGL") == 0)
-					{
-						// detected DivaGL
-						printf("[Novidia] Detected DivaGL! Quitting!\n");
+	if(GetModuleHandleW(L"DivaGL.dva") != NULL)
+	{
+		// detected DivaGL
+		printf("[Novidia] Detected DivaGL! Quitting!\n");
 #ifdef _DEBUG
-						MessageBoxExW(NULL, L"Detected DivaGL! Quitting!\n", L"Novidia", MB_OK, 0);
+		MessageBoxExW(NULL, L"Detected DivaGL! Quitting!\n", L"Novidia", MB_OK, 0);
 #endif
-						return true;
-					}
-				}
-			}
-		}
+		return true;
 	}
 
+	printf("[Novidia] No conflicts found.\n");
 	return false;
 }

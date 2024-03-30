@@ -190,6 +190,7 @@ namespace Launcher {
 
 			updateStyle();
 
+			checkHasInvalidGLUT();
 
 			glutInit(&argc, argv);
 			int window = glutCreateWindow("glut"); // a context must be created to use glGetString
@@ -1095,9 +1096,63 @@ private: System::Void SaveSettings() {
 private: System::Void Button_Help_Click(System::Object^ sender, System::EventArgs^ e) {
 	System::Diagnostics::Process::Start("https://github.com/PDModdingCommunity/PD-Loader/wiki");
 }
+private: System::Boolean hasInvalidGLUT = false;
+private: System::Void checkHasInvalidGLUT()
+{
+	HMODULE glutHm = GetModuleHandleW(L"glut32.dll");
+	hasInvalidGLUT = glutHm != NULL && GetProcAddress(glutHm, "__glutGetFCB") == NULL;
+
+	if (hasInvalidGLUT)
+	{
+		SkinnedMessageBox::Show(this, "Support for custom versions of \"glut32.dll\" is deprecated and will be removed in future versions of PD Loader.\nPlease restore a valid copy of the original file, then validate your files and make sure \"glut32.dll\" passes.\n\nPlease DO NOT ASK for a copy of the file in our support channels!\nWe cannot provide it to you.", "PD Launcher", MessageBoxButtons::OK, MessageBoxIcon::Warning);
+	}
+}
+private: System::Boolean hasInvalidSettings()
+{
+	bool divaGLEnabled = false;
+	bool novidiaEnabled = false;
+	bool shaderPatchEnabled = false;
+
+	for (ConfigOptionBase* option : AllPluginOpts)
+	{
+		if (lstrcmpW(option->_friendlyName, L"DivaGL") == 0)
+		{
+			divaGLEnabled = ((CheckBox^)CheckBox::FromHandle(option->mainControlHandle))->Checked;
+			if (divaGLEnabled)
+			{
+				if (hasInvalidGLUT) goto divagl_freeglut;
+				else if (novidiaEnabled) goto divagl_novidia;
+				else if (shaderPatchEnabled) goto divagl_shaderpatch;
+			}
+		}
+		else if (lstrcmpW(option->_friendlyName, L"Novidia") == 0)
+		{
+			novidiaEnabled = ((CheckBox^)CheckBox::FromHandle(option->mainControlHandle))->Checked;
+			if (novidiaEnabled && divaGLEnabled) goto divagl_novidia;
+		}
+		else if (lstrcmpW(option->_friendlyName, L"ShaderPatch") == 0)
+		{
+			shaderPatchEnabled = ((CheckBox^)CheckBox::FromHandle(option->mainControlHandle))->Checked;
+			if (shaderPatchEnabled && divaGLEnabled) goto divagl_shaderpatch;
+		}
+	}
+
+	return false;
+
+divagl_freeglut:
+	SkinnedMessageBox::Show(this, "Plugins: DivaGL does not support custom versions of \"glut32.dll\".\nPlease restore a valid copy of the original file, then validate your files and make sure \"glut32.dll\" passes.\n\nPlease DO NOT ASK for a copy of the file in our support channels!\nWe cannot provide it to you.", "PD Launcher", MessageBoxButtons::OK, MessageBoxIcon::Error);
+	return true;
+
+divagl_novidia:
+divagl_shaderpatch:
+	SkinnedMessageBox::Show(this, "Plugins: Novidia and ShaderPatch must be disabled if DivaGL is enabled.", "PD Launcher", MessageBoxButtons::OK, MessageBoxIcon::Error);
+	return true;
+}
 private: System::Void Button_Launch_Click(System::Object^ sender, System::EventArgs^ e) {
 	
 	//SkinnedMessageBox::Show(this, "It looks like the executable has been tampered with, or the version of the game is not 7.10.\n\nPlease use the \"patches\" folder instead of modifying the executable directly (or disable verification).", "PD Launcher", MessageBoxButtons::OK, MessageBoxIcon::Error);
+
+	if (hasInvalidSettings()) return;
 
 	SaveSettings();
 
