@@ -474,7 +474,7 @@ std::vector<PluginOption*> GetPluginOptions(std::vector<PluginInfo>* plugins)
 
 	for (PluginInfo &pi : *plugins)
 	{
-		PluginOption* opt = new PluginOption(pi.filename.c_str(), L"plugins", CONFIG_FILE, pi.name.c_str(), pi.description.c_str(), true, pi.configopts);
+		PluginOption* opt = new PluginOption(pi.filename.c_str(), L"plugins", CONFIG_FILE, pi.name.c_str(), pi.description.c_str(), true, pi.configopts, pi.builddate);
 		outvec.push_back(opt);
 	}
 

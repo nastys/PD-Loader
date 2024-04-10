@@ -1112,8 +1112,9 @@ private: System::Boolean hasInvalidSettings()
 	bool divaGLEnabled = false;
 	bool novidiaEnabled = false;
 	bool shaderPatchEnabled = false;
+	bool divaImGuiOldEnabled = false;
 
-	for (ConfigOptionBase* option : AllPluginOpts)
+	for (PluginOption* option : AllPluginOpts)
 	{
 		if (lstrcmpW(option->_friendlyName, L"DivaGL") == 0)
 		{
@@ -1121,8 +1122,8 @@ private: System::Boolean hasInvalidSettings()
 			if (divaGLEnabled)
 			{
 				if (hasInvalidGLUT) goto divagl_freeglut;
-				else if (novidiaEnabled) goto divagl_novidia;
-				else if (shaderPatchEnabled) goto divagl_shaderpatch;
+				else if (novidiaEnabled || shaderPatchEnabled) goto divagl_novidia;
+				else if (divaImGuiOldEnabled) goto divagl_divaimguiold;
 			}
 		}
 		else if (lstrcmpW(option->_friendlyName, L"Novidia") == 0)
@@ -1133,7 +1134,12 @@ private: System::Boolean hasInvalidSettings()
 		else if (lstrcmpW(option->_friendlyName, L"ShaderPatch") == 0)
 		{
 			shaderPatchEnabled = ((CheckBox^)CheckBox::FromHandle(option->mainControlHandle))->Checked;
-			if (shaderPatchEnabled && divaGLEnabled) goto divagl_shaderpatch;
+			if (shaderPatchEnabled && divaGLEnabled) goto divagl_novidia;
+		}
+		else if (lstrcmpW(option->_friendlyName, L"DivaImGui") == 0 && option->_builddate == L"Unknown")
+		{
+			divaImGuiOldEnabled = ((CheckBox^)CheckBox::FromHandle(option->mainControlHandle))->Checked;
+			if (divaImGuiOldEnabled && divaGLEnabled) goto divagl_divaimguiold;
 		}
 	}
 
@@ -1144,8 +1150,11 @@ divagl_freeglut:
 	return true;
 
 divagl_novidia:
-divagl_shaderpatch:
 	SkinnedMessageBox::Show(this, "Plugins: Novidia and ShaderPatch must be disabled if DivaGL is enabled.", "PD Launcher", MessageBoxButtons::OK, MessageBoxIcon::Error);
+	return true;
+
+divagl_divaimguiold:
+	SkinnedMessageBox::Show(this, "Plugins: Your version of DivaImGui is too old for DivaGL; please either update or disable it.", "PD Launcher", MessageBoxButtons::OK, MessageBoxIcon::Error);
 	return true;
 }
 private: System::Void Button_Launch_Click(System::Object^ sender, System::EventArgs^ e) {

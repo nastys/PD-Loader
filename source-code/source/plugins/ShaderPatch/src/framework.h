@@ -161,22 +161,3 @@ LPCWSTR CONFIG_FILE = CONFIG_FILE_STRING.c_str();
 //	delete[] hModules;
 //	return false;
 //}
-
-
-bool hasConflicts()
-{
-	puts("[ShaderPatch] Checking for conflicts...");
-
-	if (GetModuleHandleW(L"DivaGL.dva") != NULL)
-	{
-		// detected DivaGL
-		puts("[ShaderPatch] Detected DivaGL! Quitting!");
-#ifdef _DEBUG
-		MessageBoxExW(NULL, L"Detected DivaGL! Quitting!\n", L"ShaderPatch", MB_OK, 0);
-#endif
-		return true;
-	}
-
-	puts("[ShaderPatch] No conflicts found.");
-	return false;
-}

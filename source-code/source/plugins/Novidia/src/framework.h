@@ -152,21 +152,3 @@ void InjectCode(void* address, const std::vector<uint8_t> data)
 //	delete[] hModules;
 //	return false;
 //}
-
-bool hasConflicts()
-{
-	puts("[Novidia] Checking for conflicts...");
-
-	if(GetModuleHandleW(L"DivaGL.dva") != NULL)
-	{
-		// detected DivaGL
-		puts("[Novidia] Detected DivaGL! Quitting!");
-#ifdef _DEBUG
-		MessageBoxExW(NULL, L"Detected DivaGL! Quitting!\n", L"Novidia", MB_OK, 0);
-#endif
-		return true;
-	}
-
-	puts("[Novidia] No conflicts found.");
-	return false;
-}

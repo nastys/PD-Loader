@@ -1087,9 +1087,10 @@ class PluginOption : public ConfigOptionBase
 {
 public:
 	bool _defaultVal;
+	std::wstring _builddate;
 	std::vector<ConfigOptionBase*> _configopts;
 
-	PluginOption(LPCWSTR iniVarName, LPCWSTR iniSectionName, LPCWSTR iniFilePath, LPCWSTR friendlyName, LPCWSTR description, bool defaultVal, std::vector<ConfigOptionBase*> configopts)
+	PluginOption(LPCWSTR iniVarName, LPCWSTR iniSectionName, LPCWSTR iniFilePath, LPCWSTR friendlyName, LPCWSTR description, bool defaultVal, std::vector<ConfigOptionBase*> configopts, std::wstring builddate = L"Unknown")
 	{
 		_iniVarName = iniVarName;
 		_iniSectionName = iniSectionName;
@@ -1098,6 +1099,7 @@ public:
 		_description = description;
 		_defaultVal = defaultVal;
 		_configopts = configopts;
+		_builddate = builddate;
 	}
 
 	virtual int AddToPanel(Panel^ panel, unsigned int left, unsigned int top, ToolTip^ tooltip)
