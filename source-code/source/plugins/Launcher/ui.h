@@ -237,6 +237,7 @@ namespace Launcher {
 
 			int linkStart = this->labelGPU->Text->Length;
 			bool showGpuDialog = false;
+			bool showGpuTypeWarning = false;
 
 			bool hasNovidia = false;
 			bool novidiaEnabled = false;
@@ -393,15 +394,18 @@ namespace Launcher {
 					else if (version[0] >= '4' && gpuModel->Length > 0 && !gpuModel->StartsWith("Unk") && !gpuModel->StartsWith("Oth"))
 					{
 						this->labelGPU->Text += L"Issues: GPU may be too new.\n(Click for more information)";
-						GPUIssueText = L"It looks like your GPU may be too new. Only up to Ampere (RTX 30xx) is currently supported.\nGood news: the game should be capable of running, but shader patches (probably needed) may not support it yet.\nYou will likely see lines/noise on important character shaders and some minor stage shaders.\nPlease report any issues so that ShaderPatch can be updated.\nYou can also try forcing a specific GPU workaround type.";
+						GPUIssueText = L"It looks like your GPU may be too new. Only up to Ada Lovelace (RTX 40xx) is currently supported.\nYou will likely see lines/noise on important character shaders and some minor stage shaders.\nPlease report any issues so that ShaderPatch can be updated.\n\nTo try to get rid of any artifacts, try selecting a specific GPU architecture in Graphics -> Nvidia GPU (e.g. \"Ada or newer\"), or use DivaGL.";
 						this->labelGPU->LinkColor = System::Drawing::Color::Orange;
+						showGpuDialog = true;
+						showGpuTypeWarning = true;
 					}
 					else
 					{
 						this->labelGPU->Text += L"Issues: Unable to detect GPU architecture.\n(Click for more information)";
-						GPUIssueText = L"It looks like you have an NVIDIA GPU, but something went wrong while trying to determine your GPU's architecture (type).\nThis may be a caused by a bug, but it probably indicates potential issues.\nPlease make sure you have a GTX 600 series or later GPU. (GTX 400 series or later should also work)";
+						GPUIssueText = L"It looks like you have an NVIDIA GPU, but something went wrong while trying to determine your GPU's architecture (type).\nThis may be a caused by a bug, but it probably indicates potential issues.\nPlease make sure you have a GTX 600 series or later GPU. (GTX 400 series or later should also work)\n\nIf the game runs but has artifacts, try selecting a specific GPU architecture in Graphics -> Nvidia GPU (e.g. \"Ada or newer\"), or use DivaGL.";
 						this->labelGPU->LinkColor = System::Drawing::Color::Orange;
 						showGpuDialog = true;
+						showGpuTypeWarning = true;
 					}
 				}
 				else //if (gpuModel->Length == 0 || gpuModel->StartsWith("Unk") || gpuModel->StartsWith("Oth"))
@@ -417,8 +421,24 @@ namespace Launcher {
 			this->labelGPU->LinkClicked += gcnew System::Windows::Forms::LinkLabelLinkClickedEventHandler(this, &ui::LinkLabelLinkClickedGPUIssueHandler);
 			this->labelGPU->LinkArea = System::Windows::Forms::LinkArea(linkStart, linkEnd);
 
-			if (showGpuDialog && !nNoGPUDialog)
-				SkinnedMessageBox::Show(this, GPUIssueText + "\n\nYou can disable this message from the options tab.", "PD Launcher", MessageBoxButtons::OK, MessageBoxIcon::Warning);
+			if (!nNoGPUDialog)
+			{
+				if (showGpuDialog)
+					SkinnedMessageBox::Show(this, GPUIssueText + "\n\nYou can disable this message from the Options tab.", "PD Launcher", MessageBoxButtons::OK, MessageBoxIcon::Warning);
+
+				if (showGpuTypeWarning)
+				{
+					Label^ gpuTypeLabel = ((Label^)Control::FromHandle(((DropdownOption*)(graphicsArray[0]))->labelHandle));
+					ComboBox^ gpuTypeCtrl = ((ComboBox^)Control::FromHandle(((DropdownOption*)(graphicsArray[0]))->mainControlHandle));
+					gpuTypeLabel->Text = "/!\\ " + gpuTypeLabel->Text;
+					gpuTypeLabel->BackColor = System::Drawing::Color::Gold;
+					gpuTypeLabel->ForeColor = System::Drawing::Color::Crimson;
+					gpuTypeCtrl->Items[0] = "SELECT ONE";
+					gpuTypeCtrl->BackColor = System::Drawing::Color::Gold;
+					gpuTypeCtrl->ForeColor = System::Drawing::Color::Crimson;
+					gpuTypeCtrl->FlatStyle = System::Windows::Forms::FlatStyle::Flat;
+				}
+			}
 		}
 
 	protected:
@@ -1112,6 +1132,7 @@ private: System::Boolean hasInvalidSettings()
 	bool divaGLEnabled = false;
 	bool novidiaEnabled = false;
 	bool shaderPatchEnabled = false;
+	//bool divaImGuiEnabled = false;
 	bool divaImGuiOldEnabled = false;
 
 	for (PluginOption* option : AllPluginOpts)
@@ -1136,12 +1157,33 @@ private: System::Boolean hasInvalidSettings()
 			shaderPatchEnabled = ((CheckBox^)CheckBox::FromHandle(option->mainControlHandle))->Checked;
 			if (shaderPatchEnabled && divaGLEnabled) goto divagl_novidia;
 		}
-		else if (lstrcmpW(option->_friendlyName, L"DivaImGui") == 0 && option->_builddate == L"Unknown")
+		else if (lstrcmpW(option->_friendlyName, L"DivaImGui") == 0)
 		{
-			divaImGuiOldEnabled = ((CheckBox^)CheckBox::FromHandle(option->mainControlHandle))->Checked;
-			if (divaImGuiOldEnabled && divaGLEnabled) goto divagl_divaimguiold;
+			//divaImGuiEnabled = ((CheckBox^)CheckBox::FromHandle(option->mainControlHandle))->Checked;
+
+			if (option->_builddate == L"Unknown")
+			{
+				divaImGuiOldEnabled = ((CheckBox^)CheckBox::FromHandle(option->mainControlHandle))->Checked;
+				if (divaImGuiOldEnabled && divaGLEnabled) goto divagl_divaimguiold;
+			}
 		}
 	}
+
+	//if (divaImGuiEnabled)
+	//{
+	//	for (ConfigOptionBase* option : graphicsArray)
+	//	{
+	//		if (option->_iniSectionName == GRAPHICS_SECTION && option->_iniVarName == L"2D")
+	//		{
+	//			if (((CheckBox^)CheckBox::FromHandle(option->mainControlHandle))->Checked)
+	//			{
+	//				SkinnedMessageBox::Show(this, "Graphics: \"Disable 3D rendering\" must be disabled if DivaImGui is enabled.", "PD Launcher", MessageBoxButtons::OK, MessageBoxIcon::Error);
+	//				return true;
+	//			}
+	//			break;
+	//		}
+	//	}
+	//}
 
 	return false;
 
@@ -1157,10 +1199,19 @@ divagl_divaimguiold:
 	SkinnedMessageBox::Show(this, "Plugins: Your version of DivaImGui is too old for DivaGL; please either update or disable it.", "PD Launcher", MessageBoxButtons::OK, MessageBoxIcon::Error);
 	return true;
 }
+private: System::Boolean warnCheck()
+{
+	if (((ComboBox^)Control::FromHandle(((DropdownOption*)(graphicsArray[0]))->mainControlHandle))->Text == "SELECT ONE" &&
+		SkinnedMessageBox::Show(this, L"GPU detection has failed and no Nvidia GPU architecture has been selected.\nAs such, characters and stages may exhibit artifacts, such as noisy shadows and stages.\nIf unsure, try all of the options starting from Kepler.\n\nLaunch anyway?", "PD Launcher", MessageBoxButtons::YesNo, MessageBoxIcon::Error) != System::Windows::Forms::DialogResult::OK)
+			return false;
+
+	return true;
+}
 private: System::Void Button_Launch_Click(System::Object^ sender, System::EventArgs^ e) {
 	
 	//SkinnedMessageBox::Show(this, "It looks like the executable has been tampered with, or the version of the game is not 7.10.\n\nPlease use the \"patches\" folder instead of modifying the executable directly (or disable verification).", "PD Launcher", MessageBoxButtons::OK, MessageBoxIcon::Error);
 
+	if (!warnCheck()) return;
 	if (hasInvalidSettings()) return;
 
 	SaveSettings();
