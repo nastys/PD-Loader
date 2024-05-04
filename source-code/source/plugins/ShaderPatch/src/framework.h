@@ -1,6 +1,7 @@
 #pragma once
-#define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
-#include <windows.h>
+//#define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
+//#include <windows.h>
+//#include <psapi.h>
 #include <string>
 #include <vector>
 #include <map>
@@ -127,3 +128,36 @@ LPCWSTR DATA_FILE = DATA_FILE_STRING.c_str();
 std::wstring CONFIG_FILE_STRING = DirPath() + L"\\plugins\\ShaderPatchConfig.ini";
 LPCWSTR CONFIG_FILE = CONFIG_FILE_STRING.c_str();
 
+//bool hasConflicts()
+//{
+//	printf("[ShaderPatch] Checking for conflicts...\n");
+//
+//	HMODULE* hModules = new HMODULE[USHRT_MAX];
+//	HANDLE hProcess;
+//	DWORD cbNeeded;
+//
+//	hProcess = GetCurrentProcess();
+//
+//	if (EnumProcessModules(hProcess, hModules, sizeof(hModules), &cbNeeded)) {
+//		for (unsigned long long i = 0; i < (cbNeeded / sizeof(HMODULE)); i++) {
+//			auto pNameFunc = (LPCWSTR(*)())GetProcAddress(hModules[i], "GetPluginName");
+//			if (pNameFunc) {
+//				LPCWSTR name = pNameFunc();
+//				if (name && lstrcmpW(name, L"DivaGL") == 0)
+//				{
+//					// detected DivaGL
+//					printf("[ShaderPatch] Detected DivaGL! Quitting!\n");
+//#ifdef _DEBUG
+//					MessageBoxExW(NULL, L"Detected DivaGL! Quitting!\n", L"ShaderPatch", MB_OK, 0);
+//#endif
+//					delete[] hModules;
+//					return true;
+//				}
+//			}
+//		}
+//	}
+//
+//	printf("[ShaderPatch] No conflicts found.\n");
+//	delete[] hModules;
+//	return false;
+//}

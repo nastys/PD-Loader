@@ -47,6 +47,10 @@ namespace TLAC::Components
 
 		static std::vector<uint8_t> origFramespeedOp;
 		static uint8_t* framespeedPatchAddress;
+		static float_t origDeltaFrameHistory;
+		static int32_t origDeltaFrameHistoryInt;
+		static float_t* deltaFrameHistoryAddress;
+		static int32_t* deltaFrameHistoryIntAddress;
 
 		static std::vector<uint8_t> origAgeageHairOp;
 		static uint8_t* ageageHairPatchAddress;

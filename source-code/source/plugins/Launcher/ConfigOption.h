@@ -609,6 +609,7 @@ public:
 	int _defaultVal;
 	int _indexOffset;
 	std::vector<LPCWSTR> _valueStrings;
+	System::IntPtr labelHandle;
 
 	DropdownOption(LPCWSTR iniVarName, LPCWSTR iniSectionName, LPCWSTR iniFilePath, LPCWSTR friendlyName, LPCWSTR description, int defaultVal, std::vector<LPCWSTR> valueStrings, int indexOffset=0)
 	{
@@ -628,6 +629,7 @@ public:
 		ComboBox^ combobox = gcnew ComboBox();
 
 		label->Text = gcnew String(_friendlyName);
+		labelHandle = label->Handle;
 		label->Left = left;
 		label->Top = top + 3;
 		label->Width = Col1Width;
@@ -1087,9 +1089,10 @@ class PluginOption : public ConfigOptionBase
 {
 public:
 	bool _defaultVal;
+	std::wstring _builddate;
 	std::vector<ConfigOptionBase*> _configopts;
 
-	PluginOption(LPCWSTR iniVarName, LPCWSTR iniSectionName, LPCWSTR iniFilePath, LPCWSTR friendlyName, LPCWSTR description, bool defaultVal, std::vector<ConfigOptionBase*> configopts)
+	PluginOption(LPCWSTR iniVarName, LPCWSTR iniSectionName, LPCWSTR iniFilePath, LPCWSTR friendlyName, LPCWSTR description, bool defaultVal, std::vector<ConfigOptionBase*> configopts, std::wstring builddate = L"Unknown")
 	{
 		_iniVarName = iniVarName;
 		_iniSectionName = iniSectionName;
@@ -1098,6 +1101,7 @@ public:
 		_description = description;
 		_defaultVal = defaultVal;
 		_configopts = configopts;
+		_builddate = builddate;
 	}
 
 	virtual int AddToPanel(Panel^ panel, unsigned int left, unsigned int top, ToolTip^ tooltip)

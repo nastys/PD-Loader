@@ -32,9 +32,13 @@ namespace TLAC::Components
 	Pause::menusets Pause::curMenuSet = MENUSET_MAIN;
 	std::chrono::time_point<std::chrono::high_resolution_clock> Pause::menuItemMoveTime;
 	std::vector<uint8_t> Pause::origAetMovOp;
+	float_t Pause::origDeltaFrameHistory = 0.0f;
+	int32_t Pause::origDeltaFrameHistoryInt = 0;
 	uint8_t* Pause::aetMovPatchAddress = (uint8_t*)0x1401703b3;
 	std::vector<uint8_t> Pause::origFramespeedOp;
 	uint8_t* Pause::framespeedPatchAddress = (uint8_t*)0x140192D50;
+	float_t* Pause::deltaFrameHistoryAddress = (float_t*)0x140EDA6C0;
+	int32_t* Pause::deltaFrameHistoryIntAddress = (int32_t*)0x140EDA6C4;
 	std::vector<uint8_t> Pause::origAgeageHairOp;
 	uint8_t* Pause::ageageHairPatchAddress = (uint8_t*)0x14054352c;
 	std::vector<bool> Pause::streamPlayStates;
@@ -135,6 +139,12 @@ namespace TLAC::Components
 				InjectCode(aetMovPatchAddress, { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 });
 				InjectCode(framespeedPatchAddress, { 0x0f, 0x57, 0xc0, 0xc3 }); // XORPS XMM0,XMM0; RET
 				InjectCode(ageageHairPatchAddress, { 0x0f, 0x57, 0xdb }); // XORPS XMM3,XMM3
+
+				origDeltaFrameHistory = *deltaFrameHistoryAddress;
+				origDeltaFrameHistoryInt = *deltaFrameHistoryIntAddress;
+
+				*deltaFrameHistoryAddress = 0.0f;
+				*deltaFrameHistoryIntAddress = 0;
 
 				uint64_t audioMixerAddr = *(uint64_t*)(AUDIO_MAIN_CLASS_ADDRESS + 0x70);
 				uint64_t audioStreamsAddress = *(uint64_t*)(audioMixerAddr + 0x18);
@@ -278,6 +288,9 @@ namespace TLAC::Components
 				InjectCode(aetMovPatchAddress, origAetMovOp);
 				InjectCode(framespeedPatchAddress, origFramespeedOp);
 				InjectCode(ageageHairPatchAddress, origAgeageHairOp);
+
+				*deltaFrameHistoryAddress = origDeltaFrameHistory;
+				*deltaFrameHistoryIntAddress = origDeltaFrameHistoryInt;
 
 				uint64_t audioMixerAddr = *(uint64_t*)(AUDIO_MAIN_CLASS_ADDRESS + 0x70);
 				uint64_t audioStreamsAddress = *(uint64_t*)(audioMixerAddr + 0x18);

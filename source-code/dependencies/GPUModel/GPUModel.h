@@ -34,9 +34,9 @@ namespace GPUModel
 	// note that the used GL context may differ
 	std::string getGpuName()
 	{
-		// detected model can be overridden -- 0: Kepler, 1: Maxwell, 2: Turing, 3: Ampere
+		// detected model can be overridden -- 0: Kepler, 1: Maxwell, 2: Turing, 3: Ampere, 4: Ada Lovelace
 		int nGPUModel = GetPrivateProfileIntW(L"gpu", L"model", -1, CONFIG_FILE);
-		if (nGPUModel >= 0 && nGPUModel <= 3)
+		if (nGPUModel >= 0 && nGPUModel <= 4)
 		{
 			std::string arch;
 			switch (nGPUModel)
@@ -53,6 +53,9 @@ namespace GPUModel
 			case 3:
 				arch = "GA000";
 				break;
+			case 4:
+				arch = "AD000";
+				break;
 			}
 
 			printf("[GPUModel] GPU Model override: %s\n", arch.c_str());
@@ -65,7 +68,7 @@ namespace GPUModel
 		//DWORD dwAttrib = GetFileAttributesW(L"amdgfxinfo64.dll");
 		//if (dwAttrib != INVALID_FILE_ATTRIBUTES && !(dwAttrib & FILE_ATTRIBUTE_DIRECTORY))
 		struct stat buffer; // for some reason winapi version wasn't working
-		if (stat("amdgfxinfo64.dll", &buffer) == 0);
+		if (stat("amdgfxinfo64.dll", &buffer) == 0)
 		{
 			non_nv_name = "AMD";
 		}
