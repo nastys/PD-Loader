@@ -34,7 +34,7 @@ namespace GPUModel
 	// note that the used GL context may differ
 	std::string getGpuName()
 	{
-		// detected model can be overridden -- 0: Kepler, 1: Maxwell, 2: Turing, 3: Ampere, 4: Ada Lovelace
+		// detected model can be overridden -- 0: Kepler, 1: Maxwell, 2: Turing, 3: Ampere, 4: Ada Lovelace, 5: Blackwell
 		int nGPUModel = GetPrivateProfileIntW(L"gpu", L"model", -1, CONFIG_FILE);
 		if (nGPUModel >= 0 && nGPUModel <= 4)
 		{
@@ -55,6 +55,9 @@ namespace GPUModel
 				break;
 			case 4:
 				arch = "AD000";
+				break;
+			case 5:
+				arch = "GB000";
 				break;
 			}
 
