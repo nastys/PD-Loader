@@ -22,14 +22,17 @@ Toon_Hair_Improve=0
 Toon_Hair_Improve_Val1=1.25
 
 # Lyb's toon shader improvements (24 sept 2019)
+# Fixes by korenkonder (11 jan 2025)
 # Toon_Lines_Improve: Adjusts toon shader outlines
 Toon_Lines_Improve=0
-# ???
-Toon_Lines_Improve_Val1=0.75
-# Thickness Multiplier(?)
-Toon_Lines_Improve_Val2=0.75
-# Thickness Offset(?)
-Toon_Lines_Improve_Val3=0.75
+# Skin Shadow Strength
+Toon_Lines_Improve_Val1=0.05
+# Skin Outline Strength
+Toon_Lines_Improve_Val2=0.9
+# Outline Strength Multiplier
+Toon_Lines_Improve_Val3=0.7
+# Outline Strength Offset
+Toon_Lines_Improve_Val4=0.25
 
 # Debug patches:
 # Nametags
